@@ -331,7 +331,12 @@ async function extractDocData(b64,doc){
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'
+  'Content-Type':'application/json',
+  'x-api-key':'sk-ant-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',
+  'anthropic-version':'2023-06-01',
+  'anthropic-dangerous-direct-browser-access':'true'
+},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:1000,
