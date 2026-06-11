@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AnesteControl · Lagos Anestesia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f4f5f7;color:#1a1a2e;min-height:100vh;}
+  .app{max-width:480px;margin:0 auto;padding:1rem;padding-bottom:2rem;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  .logo-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #e8eaf0;}
+  .logo-icon{width:38px;height:38px;background:#1a4fa8;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;}
+  .logo-text{font-size:16px;font-weight:600;color:#1a1a2e;}
+  .logo-sub{font-size:11px;color:#6b7280;margin-top:1px;}
+
+  .card{background:#fff;border:1px solid #e8eaf0;border-radius:14px;padding:1.25rem;margin-bottom:0.75rem;}
+  .card-title{font-size:13px;font-weight:600;color:#6b7280;margin-bottom:0.75rem;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.04em;}
+
+  select,input,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;color:#1a1a2e;margin-bottom:0.75rem;-webkit-appearance:none;}
+  select:focus,input:focus,textarea:focus{outline:none;border-color:#1a4fa8;box-shadow:0 0 0 3px rgba(26,79,168,0.1);}
+  textarea{resize:vertical;}
+
+  .btn-primary{width:100%;padding:12px;background:#1a4fa8;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-primary:hover{background:#163d85;}
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-secondary{width:100%;padding:11px;background:#fff;color:#374151;border:1px solid #d1d5db;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn-secondary:hover{background:#f9fafb;}
+  .btn-sm{padding:7px 14px;background:#fff;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;color:#374151;display:inline-flex;align-items:center;gap:5px;}
+  .btn-sm:hover{background:#f3f4f6;}
+
+  .step-pills{display:flex;gap:4px;margin-bottom:1rem;overflow-x:auto;padding-bottom:4px;}
+  .pill{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;border:1px solid #e8eaf0;color:#6b7280;background:#f9fafb;}
+  .pill.done{background:#d1fae5;color:#065f46;border-color:#6ee7b7;}
+  .pill.current{background:#dbeafe;color:#1e40af;border-color:#93c5fd;}
+
+  .doc-card{border:2px dashed #d1d5db;border-radius:14px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:0.75rem;transition:all 0.15s;background:#fafafa;}
+  .doc-card:hover{border-color:#1a4fa8;background:#eff6ff;}
+  .doc-card.has-image{border-style:solid;border-color:#10b981;background:#f0fdf4;}
+  .doc-icon{font-size:32px;color:#9ca3af;margin-bottom:8px;display:block;}
+  .doc-card.has-image .doc-icon{color:#059669;}
+  .doc-name{font-size:14px;font-weight:600;color:#374151;}
+  .doc-sub{font-size:12px;color:#6b7280;margin-top:3px;}
+
+  .preview-img{width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:8px;border:1px solid #e8eaf0;}
+
+  .spinner-wrap{display:flex;align-items:center;gap:10px;padding:14px;background:#eff6ff;border-radius:10px;margin-bottom:0.75rem;border:1px solid #bfdbfe;}
+  .spinner{width:18px;height:18px;border:2px solid #bfdbfe;border-top-color:#1a4fa8;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .field-row{margin-bottom:0.75rem;}
+  .field-label{font-size:11px;color:#6b7280;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.03em;}
+  .field-val{font-size:13px;font-weight:500;padding:8px 10px;background:#f9fafb;border-radius:8px;border:1px solid #e8eaf0;line-height:1.4;}
+  .field-val.ok{background:#d1fae5;color:#065f46;border-color:#6ee7b7;}
+  .field-val.warn{background:#fef3c7;color:#92400e;border-color:#fcd34d;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+  .sec-header{font-size:12px;font-weight:700;color:#6b7280;display:flex;align-items:center;gap:6px;margin:1rem 0 0.6rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .num-badge{width:22px;height:22px;border-radius:50%;background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  .proc-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;}
+  .proc-row:last-child{border-bottom:none;}
+  .proc-code{font-size:12px;font-weight:600;color:#1e40af;background:#dbeafe;padding:3px 8px;border-radius:6px;white-space:nowrap;}
+  .proc-desc{font-size:13px;flex:1;color:#374151;}
+
+  .alert-box{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:0.75rem;display:flex;gap:8px;align-items:flex-start;}
+  .success-box{background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:10px 12px;font-size:12px;color:#065f46;margin-bottom:0.75rem;display:flex;gap:8px;align-items:flex-start;}
+
+  .nav-back{display:flex;align-items:center;gap:6px;color:#6b7280;font-size:13px;cursor:pointer;margin-bottom:1rem;font-weight:500;}
+  .nav-back:hover{color:#1a1a2e;}
+
+  .progress-bar{height:4px;background:#e8eaf0;border-radius:2px;margin-bottom:1rem;overflow:hidden;}
+  .progress-fill{height:100%;background:#1a4fa8;border-radius:2px;transition:width 0.3s;}
+
+  .result-box{background:#f9fafb;border:1px solid #e8eaf0;border-radius:10px;padding:1rem;font-size:13px;line-height:1.8;white-space:pre-wrap;max-height:400px;overflow-y:auto;margin-bottom:0.75rem;color:#374151;}
+
+  .home-btn{background:#fff;border:1px solid #e8eaf0;border-radius:14px;padding:1.25rem;margin-bottom:0.75rem;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s;}
+  .home-btn:hover{border-color:#1a4fa8;background:#eff6ff;}
+  .home-btn-icon{width:44px;height:44px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;color:#1a4fa8;font-size:22px;flex-shrink:0;}
+  .home-btn-text{font-size:15px;font-weight:600;color:#1a1a2e;}
+  .home-btn-sub{font-size:12px;color:#6b7280;margin-top:2px;}
+
+  .tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:6px;margin:2px;font-weight:500;}
+  .tag-blue{background:#dbeafe;color:#1e40af;}
+  .tag-green{background:#d1fae5;color:#065f46;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="logo-bar">
+    <div class="logo-icon"><i class="ti ti-stethoscope"></i></div>
+    <div>
+      <div class="logo-text">AnesteControl</div>
+      <div class="logo-sub">Lagos Anestesia · Hospital Santa Helena</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-user"></i> Identificação</div>
+    <select id="sel-medico">
+      <option value="">Selecione seu nome...</option>
+      <option value="Igor Souza de Almeida|52-81634-5">Igor Souza de Almeida</option>
+      <option value="Alberto Luís da Costa Martins|52-59939-5">Alberto Luís da Costa Martins</option>
+      <option value="André Santos Carmo|52-89827-9">André Santos Carmo</option>
+      <option value="Rodrigo Vieira Guimarães|52-76888-0">Rodrigo Vieira Guimarães</option>
+      <option value="Bruno Pacheco Ibraim|52-93697-9">Bruno Pacheco Ibraim</option>
+      <option value="Igor Ferreira Arantes|52-0113517-1">Igor Ferreira Arantes</option>
+      <option value="Renato Ferreira de Oliveira|52-0071539-5">Renato Ferreira de Oliveira</option>
+      <option value="Lucas Delesposte Lins|52-0108020-2">Lucas Delesposte Lins</option>
+    </select>
+    <button class="btn-primary" onclick="doLogin()"><i class="ti ti-arrow-right"></i> Entrar</button>
+  </div>
+  <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:1rem;">Hospital Santa Helena · Cabo Frio RJ</p>
+</div>
+
+<!-- HOME -->
+<div id="screen-home" class="screen">
+  <div class="logo-bar">
+    <div class="logo-icon"><i class="ti ti-stethoscope"></i></div>
+    <div style="flex:1;">
+      <div class="logo-text">AnesteControl</div>
+      <div class="logo-sub" id="home-medico-label"></div>
+    </div>
+    <span style="font-size:12px;color:#6b7280;cursor:pointer;" onclick="goScreen('screen-login')">Sair</span>
+  </div>
+
+  <div class="home-btn" onclick="iniciarNovoCaso()">
+    <div class="home-btn-icon"><i class="ti ti-plus"></i></div>
+    <div>
+      <div class="home-btn-text">Novo procedimento</div>
+      <div class="home-btn-sub">Fotografar documentos → rascunho Coopanest</div>
+    </div>
+  </div>
+
+  <div id="casos-recentes-area"></div>
+</div>
+
+<!-- CAPTURA -->
+<div id="screen-captura" class="screen">
+  <div class="nav-back" onclick="goScreen('screen-home')"><i class="ti ti-arrow-left"></i> Início</div>
+  <div class="progress-bar"><div class="progress-fill" id="captura-progress" style="width:0%"></div></div>
+  <div class="step-pills" id="step-pills"></div>
+  <div id="doc-upload-area"></div>
+  <input type="file" id="file-input-hidden" accept="image/*" capture="environment" onchange="onFileSelected(this)">
+  <div id="extract-loading" style="display:none;" class="spinner-wrap">
+    <div class="spinner"></div>
+    <span id="extract-loading-text" style="font-size:13px;color:#374151;">Analisando documento...</span>
+  </div>
+  <div id="extract-result" style="display:none;"></div>
+  <div id="captura-nav" style="display:none;">
+    <button class="btn-primary" id="btn-proximo" onclick="proximoDoc()"><i class="ti ti-arrow-right"></i> Próximo documento</button>
+    <button class="btn-secondary" onclick="document.getElementById('file-input-hidden').click()"><i class="ti ti-camera"></i> Refazer foto</button>
+  </div>
+</div>
+
+<!-- REVISÃO -->
+<div id="screen-revisao" class="screen">
+  <div class="nav-back" onclick="goScreen('screen-captura')"><i class="ti ti-arrow-left"></i> Captura</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-file-check"></i> Revise os dados extraídos</div>
+
+    <div class="sec-header"><div class="num-badge">01</div> Dados do médico</div>
+    <div class="grid2">
+      <div class="field-row"><div class="field-label">Anestesista</div><div class="field-val ok" id="rev-medico"></div></div>
+      <div class="field-row"><div class="field-label">CRM</div><div class="field-val ok" id="rev-crm"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="field-row"><div class="field-label">Grau</div><div class="field-val ok">Principal</div></div>
+      <div class="field-row"><div class="field-label">Empresa / tipo</div><div class="field-val ok">LAGOS · PJ</div></div>
+    </div>
+
+    <div class="sec-header"><div class="num-badge">02</div> Dados do paciente</div>
+    <div class="field-row" style="grid-column:1/-1;"><div class="field-label">Nome completo</div><input id="rev-paciente"></div>
+    <div class="grid2">
+      <div class="field-row"><div class="field-label">CPF</div><input id="rev-cpf"></div>
+      <div class="field-row"><div class="field-label">Data de nascimento</div><input id="rev-nascimento"></div>
+    </div>
+    <div class="field-row"><div class="field-label">Convênio</div>
+      <select id="rev-convenio">
+        <option value="">Selecione...</option>
+        <option>Allianz Saúde</option><option>AMAFRERJ</option><option>Amil</option>
+        <option>Anafe Saúde</option><option>Fundação ASSEFAZ</option><option>Assim Saúde</option>
+        <option>Banco Central do Brasil</option><option>Bradesco Saúde</option>
+        <option>Bradesco Saúde Operadora de Planos SA</option><option>Caberj Saúde</option>
+        <option>Integral Saúde</option><option>CAMPERJ</option><option>Capesaude</option>
+        <option>Careplus</option><option>Cassi</option><option>Caurj</option>
+        <option>Eletrobras Cepel</option><option>Eletros-saude</option><option>Embratel</option>
+        <option>Evida</option><option>Fapes BNDES</option><option>FioSaude</option>
+        <option>Itaú Fundação Saúde</option><option>GEAP Saúde</option><option>INB</option>
+        <option>Klini Saúde</option><option>Life</option><option>Mediservice</option>
+        <option>MedSenior</option><option>NovaSaude</option><option>Omint</option>
+        <option>Pame</option><option>Vale Pasa</option><option>Petrobras</option>
+        <option>Porto Saúde</option><option>Postal Saúde</option><option>Proasa</option>
+        <option>Real Grandeza</option><option>Rede Gama</option><option>Saúde ABAS</option>
+        <option>Saúde Caixa</option><option>Seguros Unimed</option><option>Select</option>
+        <option>SERPRO</option><option>SulAmérica</option><option>Telos</option>
+        <option>Unafisco Saúde</option><option>Unimed Brasil</option><option>Unimed Central Nacional</option>
+      </select>
+    </div>
+    <div class="grid2">
+      <div class="field-row"><div class="field-label">Matrícula</div><input id="rev-matricula"></div>
+      <div class="field-row"><div class="field-label">Senha</div><input id="rev-senha"></div>
+    </div>
+    <div class="grid2">
+      <div class="field-row"><div class="field-label">Acomodação</div><input id="rev-acomodacao" placeholder="Apto / Enfermaria / Ambulatório"></div>
+      <div class="field-row"><div class="field-label">Tipo atendimento</div><input id="rev-tipo-atend"></div>
+    </div>
+
+    <div class="sec-header"><div class="num-badge">03</div> Dados da cirurgia</div>
+    <div class="grid2">
+      <div class="field-row"><div class="field-label">Data</div><input id="rev-data-cir" placeholder="dd/mm/aaaa"></div>
+      <div class="field-row"><div class="field-label">Tipo</div><input id="rev-tipo-cir" placeholder="Eletiva / Urg/Emerg"></div>
+    </div>
+    <div class="grid2">
+      <div class="field-row"><div class="field-label">Início anestesia</div><input id="rev-hora-ini" placeholder="hh:mm"></div>
+      <div class="field-row"><div class="field-label">Fim anestesia</div><input id="rev-hora-fim" placeholder="hh:mm"></div>
+    </div>
+    <div class="field-row"><div class="field-label">Cirurgião principal</div><input id="rev-cirurgiao"></div>
+    <div class="field-row"><div class="field-label">CRM cirurgião</div><input id="rev-crm-cir"></div>
+
+    <div class="sec-header"><div class="num-badge">04</div> Procedimentos</div>
+    <div id="rev-procedimentos"></div>
+    <div class="field-row" style="margin-top:8px;"><div class="field-label">Tipo de anestesia</div><input id="rev-tipo-anest"></div>
+    <div class="field-row"><div class="field-label">Observações / técnica</div><textarea id="rev-obs" rows="3"></textarea></div>
+  </div>
+
+  <button class="btn-primary" onclick="gerarFaturamento()"><i class="ti ti-sparkles"></i> Gerar documento final</button>
+</div>
+
+<!-- RESULTADO -->
+<div id="screen-resultado" class="screen">
+  <div class="nav-back" onclick="goScreen('screen-revisao')"><i class="ti ti-arrow-left"></i> Revisão</div>
+  <div class="success-box"><i class="ti ti-circle-check"></i> Documento gerado! Copie e use para preencher a guia Coopanest.</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-file-invoice"></i> Rascunho para faturamento</div>
+    <div class="result-box" id="resultado-texto">Gerando...</div>
+    <button class="btn-primary" onclick="copiarResultado()"><i class="ti ti-copy"></i> Copiar documento</button>
+    <button class="btn-secondary" onclick="novoRegistro()"><i class="ti ti-plus"></i> Novo procedimento</button>
+  </div>
+</div>
+
+<script>
+const DOCS = [
+  {id:'capa',label:'Capa do prontuário',icon:'ti-id-badge',sub:'Nome, CPF, convênio, matrícula, senha',
+   prompt:'Esta é uma capa de prontuário do Hospital Santa Helena. Extraia SOMENTE JSON válido sem markdown: {"paciente":"","cpf":"","nascimento":"","convenio":"","matricula":"","acomodacao":"","tipo_atendimento":"","senha":"","guia":""}'},
+  {id:'autorizacao',label:'Guia de autorização',icon:'ti-clipboard-list',sub:'Códigos e procedimentos autorizados',
+   prompt:'Este é um documento de autorização/confirmação de senha de convênio. Extraia SOMENTE JSON válido sem markdown: {"convenio":"","matricula":"","senha":"","procedimentos":[{"codigo":"","descricao":"","qtd":"1"}],"tipo_internacao":"","natureza":""}'},
+  {id:'cirurgico',label:'Descrição cirúrgica',icon:'ti-report-medical',sub:'Cirurgião, procedimento realizado, diagnóstico',
+   prompt:'Este é um relatório de descrição cirúrgica hospitalar. Extraia SOMENTE JSON válido sem markdown: {"cirurgiao":"","crm_cirurgiao":"","data_cirurgia":"","hora_inicio_cirurgia":"","hora_fim_cirurgia":"","procedimentos":[{"codigo":"","descricao":"","qtd":"1"}],"diagnostico_pre":"","diagnostico_pos":"","tipo_cirurgia":"","anestesia_tipo":""}'},
+  {id:'anestesia',label:'Ficha de anestesia (PEPO)',icon:'ti-stethoscope',sub:'Tipo, horários, medicamentos, técnica',
+   prompt:'Esta é uma ficha de anestesia peroperatória (PEPO) do Hospital Santa Helena. Extraia SOMENTE JSON válido sem markdown: {"anestesista":"","hora_inicio_anestesia":"","hora_fim_anestesia":"","tipo_anestesia":"","tecnica":"","medicamentos":[""],"intercorrencias":"","posicao":""}'}
+];
+
+let medico='',crm='',currentDoc=0;
+let docImages={},docData={};
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function doLogin(){
+  const v=document.getElementById('sel-medico').value;
+  if(!v){alert('Selecione seu nome.');return;}
+  const p=v.split('|');
+  medico=p[0];crm=p[1];
+  document.getElementById('home-medico-label').textContent=crm+' · Santa Helena';
+  goScreen('screen-home');
+}
+
+function iniciarNovoCaso(){
+  currentDoc=0;docImages={};docData={};
+  renderStepPills();renderDocUpload();
+  document.getElementById('extract-loading').style.display='none';
+  document.getElementById('extract-result').style.display='none';
+  document.getElementById('captura-nav').style.display='none';
+  goScreen('screen-captura');
+}
+
+function renderStepPills(){
+  const labels=['Capa','Autorização','Cirúrgico','Anestesia'];
+  document.getElementById('step-pills').innerHTML=labels.map((l,i)=>{
+    let cls=i<currentDoc?'done':i===currentDoc?'current':'';
+    let icon=i<currentDoc?'<i class="ti ti-check"></i> ':'';
+    return `<span class="pill ${cls}">${icon}${i+1}. ${l}</span>`;
+  }).join('');
+  document.getElementById('captura-progress').style.width=(currentDoc/4*100)+'%';
+}
+
+function renderDocUpload(){
+  const doc=DOCS[currentDoc];
+  const hasImg=!!docImages[doc.id];
+  document.getElementById('doc-upload-area').innerHTML=`
+    <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">${doc.label}</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:0.75rem;">${doc.sub}</div>
+    ${hasImg
+      ?`<img src="${docImages[doc.id]}" class="preview-img" alt="Prévia"><button class="btn-sm" onclick="document.getElementById('file-input-hidden').click()"><i class="ti ti-camera"></i> Refazer</button>`
+      :`<div class="doc-card" onclick="document.getElementById('file-input-hidden').click()">
+          <i class="ti ${doc.icon} doc-icon"></i>
+          <div class="doc-name">Fotografar / selecionar imagem</div>
+          <div class="doc-sub">Toque para abrir câmera ou galeria</div>
+        </div>`
+    }`;
+  document.getElementById('file-input-hidden').value='';
+}
+
+function onFileSelected(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const doc=DOCS[currentDoc];
+    docImages[doc.id]=e.target.result;
+    renderDocUpload();
+    extractDocData(e.target.result.split(',')[1],doc);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function extractDocData(b64,doc){
+  document.getElementById('extract-loading').style.display='flex';
+  document.getElementById('extract-loading-text').textContent='Analisando '+doc.label.toLowerCase()+'...';
+  document.getElementById('extract-result').style.display='none';
+  document.getElementById('captura-nav').style.display='none';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+          {type:'text',text:doc.prompt}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    let text=data.content?.map(b=>b.text||'').join('')||'{}';
+    text=text.replace(/```json|```/g,'').trim();
+    let parsed={};
+    try{parsed=JSON.parse(text);}catch(e){parsed={};}
+    docData[doc.id]=parsed;
+    document.getElementById('extract-loading').style.display='none';
+    showExtractResult(doc,parsed);
+  }catch(e){
+    document.getElementById('extract-loading').style.display='none';
+    document.getElementById('extract-result').style.display='block';
+    document.getElementById('extract-result').innerHTML='<div class="alert-box"><i class="ti ti-alert-triangle"></i> Erro ao processar imagem. Tente novamente.</div>';
+  }
+}
+
+function showExtractResult(doc,parsed){
+  const el=document.getElementById('extract-result');
+  el.style.display='block';
+  let html='<div class="success-box"><i class="ti ti-circle-check"></i> Dados extraídos!</div><div class="card" style="margin-bottom:0.75rem;">';
+  Object.entries(parsed).forEach(([k,v])=>{
+    if(!v||(Array.isArray(v)&&!v.length))return;
+    if(Array.isArray(v)){
+      html+=`<div class="field-row"><div class="field-label">${k}</div>`;
+      v.forEach(item=>{
+        if(typeof item==='object'){
+          html+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f3f4f6;">
+            ${item.codigo?`<span class="tag tag-blue">${item.codigo}</span>`:''}
+            <span style="font-size:13px;">${item.descricao||''}</span>
+          </div>`;
+        }else if(item&&item.trim()){
+          html+=`<span class="tag tag-green">${item}</span>`;
+        }
+      });
+      html+='</div>';
+    }else{
+      html+=`<div class="field-row"><div class="field-label">${k.replace(/_/g,' ')}</div><div class="field-val">${v}</div></div>`;
+    }
+  });
+  html+='</div>';
+  el.innerHTML=html;
+  const isLast=currentDoc===DOCS.length-1;
+  document.getElementById('captura-nav').style.display='block';
+  const btn=document.getElementById('btn-proximo');
+  if(isLast){
+    btn.innerHTML='<i class="ti ti-file-check"></i> Revisar e finalizar';
+    btn.onclick=irParaRevisao;
+  }else{
+    btn.innerHTML='<i class="ti ti-arrow-right"></i> Próximo documento';
+    btn.onclick=proximoDoc;
+  }
+}
+
+function proximoDoc(){
+  currentDoc++;
+  renderStepPills();renderDocUpload();
+  document.getElementById('extract-result').style.display='none';
+  document.getElementById('captura-nav').style.display='none';
+  document.getElementById('extract-loading').style.display='none';
+}
+
+function mergeData(){
+  const c=docData.capa||{},a=docData.autorizacao||{},ci=docData.cirurgico||{},an=docData.anestesia||{};
+  return{
+    paciente:c.paciente||'',cpf:c.cpf||'',nascimento:c.nascimento||'',
+    convenio:c.convenio||a.convenio||ci.convenio||'',
+    matricula:c.matricula||a.matricula||'',
+    acomodacao:c.acomodacao||'',
+    tipo_atend:c.tipo_atendimento||a.tipo_internacao||'',
+    senha:c.senha||a.senha||ci.senha||'',
+    cirurgiao:ci.cirurgiao||'',crm_cir:ci.crm_cirurgiao||'',
+    data_cir:ci.data_cirurgia||an.data||'',
+    hora_ini:an.hora_inicio_anestesia||'',hora_fim:an.hora_fim_anestesia||'',
+    tipo_cir:ci.tipo_cirurgia||a.natureza||'',
+    procedimentos:ci.procedimentos||a.procedimentos||[],
+    tipo_anest:an.tipo_anestesia||ci.anestesia_tipo||'',
+    obs:an.tecnica||''
+  };
+}
+
+function setConvenio(val){
+  const sel=document.getElementById('rev-convenio');
+  if(!val)return;
+  const lower=val.toLowerCase();
+  for(let opt of sel.options){
+    if(opt.value.toLowerCase().includes(lower)||lower.includes(opt.value.toLowerCase())){
+      opt.selected=true;return;
+    }
+  }
+}
+
+function irParaRevisao(){
+  const d=mergeData();
+  document.getElementById('rev-medico').textContent=medico;
+  document.getElementById('rev-crm').textContent=crm;
+  document.getElementById('rev-paciente').value=d.paciente;
+  document.getElementById('rev-cpf').value=d.cpf;
+  document.getElementById('rev-nascimento').value=d.nascimento;
+  document.getElementById('rev-matricula').value=d.matricula;
+  document.getElementById('rev-acomodacao').value=d.acomodacao;
+  document.getElementById('rev-tipo-atend').value=d.tipo_atend;
+  document.getElementById('rev-senha').value=d.senha;
+  document.getElementById('rev-cirurgiao').value=d.cirurgiao;
+  document.getElementById('rev-crm-cir').value=d.crm_cir;
+  document.getElementById('rev-data-cir').value=d.data_cir;
+  document.getElementById('rev-hora-ini').value=d.hora_ini;
+  document.getElementById('rev-hora-fim').value=d.hora_fim;
+  document.getElementById('rev-tipo-cir').value=d.tipo_cir;
+  document.getElementById('rev-tipo-anest').value=d.tipo_anest;
+  document.getElementById('rev-obs').value=d.obs;
+  setConvenio(d.convenio);
+  const procEl=document.getElementById('rev-procedimentos');
+  if(d.procedimentos&&d.procedimentos.length){
+    procEl.innerHTML=d.procedimentos.map(p=>`
+      <div class="proc-row">
+        <span class="proc-code">${p.codigo||'—'}</span>
+        <span class="proc-desc">${p.descricao||''}</span>
+        <span style="font-size:12px;color:#9ca3af;">×${p.qtd||1}</span>
+      </div>`).join('');
+  }else{
+    procEl.innerHTML='<div class="alert-box"><i class="ti ti-alert-triangle"></i> Procedimentos não identificados — verifique manualmente</div>';
+  }
+  goScreen('screen-revisao');
+}
+
+async function gerarFaturamento(){
+  const campos={
+    medico,crm,empresa:'LAGOS',grau:'Principal',tipo_pessoa:'PJ',hospital:'Hospital Santa Helena',
+    paciente:document.getElementById('rev-paciente').value,
+    cpf:document.getElementById('rev-cpf').value,
+    nascimento:document.getElementById('rev-nascimento').value,
+    convenio:document.getElementById('rev-convenio').value,
+    matricula:document.getElementById('rev-matricula').value,
+    acomodacao:document.getElementById('rev-acomodacao').value,
+    tipo_atend:document.getElementById('rev-tipo-atend').value,
+    senha:document.getElementById('rev-senha').value,
+    cirurgiao:document.getElementById('rev-cirurgiao').value,
+    crm_cirurgiao:document.getElementById('rev-crm-cir').value,
+    data_cirurgia:document.getElementById('rev-data-cir').value,
+    hora_inicio_anestesia:document.getElementById('rev-hora-ini').value,
+    hora_fim_anestesia:document.getElementById('rev-hora-fim').value,
+    tipo_cirurgia:document.getElementById('rev-tipo-cir').value,
+    tipo_anestesia:document.getElementById('rev-tipo-anest').value,
+    obs:document.getElementById('rev-obs').value
+  };
+  goScreen('screen-resultado');
+  document.getElementById('resultado-texto').textContent='Gerando documento...';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:`Você é um assistente de faturamento médico especializado em anestesiologia no Rio de Janeiro.
+Com os dados abaixo, gere um documento estruturado e completo para preenchimento da guia Coopanest-RJ.
+Organize campo a campo na ordem do formulário (01 a 06). Inclua alertas se houver adicional de urgência/emergência.
+Calcule a duração da anestesia em minutos se houver horários.
+Seja objetivo e claro para o faturista.
+
+DADOS DO CASO:
+${JSON.stringify(campos,null,2)}`}]
+      })
+    });
+    const data=await resp.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'Erro ao gerar.';
+    document.getElementById('resultado-texto').textContent=text;
+  }catch(e){
+    document.getElementById('resultado-texto').textContent='Erro ao gerar documento. Verifique sua conexão e tente novamente.';
+  }
+}
+
+function copiarResultado(){
+  const t=document.getElementById('resultado-texto').textContent;
+  navigator.clipboard.writeText(t).then(()=>{
+    const btn=event.currentTarget;
+    const orig=btn.innerHTML;
+    btn.innerHTML='<i class="ti ti-check"></i> Copiado!';
+    setTimeout(()=>btn.innerHTML=orig,2000);
+  });
+}
+
+function novoRegistro(){iniciarNovoCaso();}
+</script>
+</body>
+</html>
