@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AnesteControl · Lagos Anestesia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f4f5f7;color:#1a1a2e;min-height:100vh;}
+  .app{max-width:480px;margin:0 auto;padding:1rem;padding-bottom:2rem;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  .logo-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #e8eaf0;}
+  .logo-icon{width:38px;height:38px;background:#1a4fa8;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;}
+  .logo-text{font-size:16px;font-weight:600;color:#1a1a2e;}
+  .logo-sub{font-size:11px;color:#6b7280;margin-top:1px;}
+
+  .card{background:#fff;border:1px solid #e8eaf0;border-radius:14px;padding:1.25rem;margin-bottom:0.75rem;}
+  .card-title{font-size:13px;font-weight:600;color:#6b7280;margin-bottom:0.75rem;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.04em;}
+
+  select,input{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;color:#1a1a2e;margin-bottom:0.75rem;-webkit-appearance:none;}
+  select:focus,input:focus{outline:none;border-color:#1a4fa8;box-shadow:0 0 0 3px rgba(26,79,168,0.1);}
+
+  .btn-primary{width:100%;padding:13px;background:#1a4fa8;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-primary:hover{background:#163d85;}
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-secondary{width:100%;padding:11px;background:#fff;color:#374151;border:1px solid #d1d5db;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn-secondary:hover{background:#f9fafb;}
+  .btn-whats{width:100%;padding:13px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-whats:hover{background:#1ebe5a;}
+  .btn-sm{padding:7px 14px;background:#fff;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;color:#374151;display:inline-flex;align-items:center;gap:5px;}
+  .btn-sm:hover{background:#f3f4f6;}
+
+  .step-pills{display:flex;gap:4px;margin-bottom:1rem;overflow-x:auto;padding-bottom:4px;}
+  .pill{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;border:1px solid #e8eaf0;color:#6b7280;background:#f9fafb;}
+  .pill.done{background:#d1fae5;color:#065f46;border-color:#6ee7b7;}
+  .pill.current{background:#dbeafe;color:#1e40af;border-color:#93c5fd;}
+
+  .doc-card{border:2px dashed #d1d5db;border-radius:14px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:0.75rem;transition:all 0.15s;background:#fafafa;}
+  .doc-card:hover{border-color:#1a4fa8;background:#eff6ff;}
+  .doc-card.has-image{border-style:solid;border-color:#10b981;background:#f0fdf4;}
+  .doc-icon{font-size:32px;color:#9ca3af;margin-bottom:8px;display:block;}
+  .doc-card.has-image .doc-icon{color:#059669;}
+  .doc-name{font-size:14px;font-weight:600;color:#374151;}
+  .doc-sub{font-size:12px;color:#6b7280;margin-top:3px;}
+
+  .preview-img{width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin-bottom:8px;border:1px solid #e8eaf0;background:#000;}
+
+  .nav-back{display:flex;align-items:center;gap:6px;color:#6b7280;font-size:13px;cursor:pointer;margin-bottom:1rem;font-weight:500;}
+  .nav-back:hover{color:#1a1a2e;}
+
+  .progress-bar{height:4px;background:#e8eaf0;border-radius:2px;margin-bottom:1rem;overflow:hidden;}
+  .progress-fill{height:100%;background:#1a4fa8;border-radius:2px;transition:width 0.3s;}
+
+  .home-btn{background:#fff;border:1px solid #e8eaf0;border-radius:14px;padding:1.25rem;margin-bottom:0.75rem;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s;}
+  .home-btn:hover{border-color:#1a4fa8;background:#eff6ff;}
+  .home-btn-icon{width:44px;height:44px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;color:#1a4fa8;font-size:22px;flex-shrink:0;}
+  .home-btn-text{font-size:15px;font-weight:600;color:#1a1a2e;}
+  .home-btn-sub{font-size:12px;color:#6b7280;margin-top:2px;}
+
+  .success-box{background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:12px 14px;font-size:13px;color:#065f46;margin-bottom:0.75rem;display:flex;gap:8px;align-items:flex-start;}
+  .info-box{background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:10px 12px;font-size:12px;color:#1e40af;margin-bottom:0.75rem;display:flex;gap:8px;align-items:flex-start;}
+
+  .pdf-preview-thumb{width:100%;border-radius:10px;border:1px solid #e8eaf0;margin-bottom:0.5rem;}
+  .thumbs-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+  .thumb-card{background:#f9fafb;border:1px solid #e8eaf0;border-radius:10px;padding:8px;text-align:center;}
+  .thumb-card img{width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:4px;}
+  .thumb-label{font-size:11px;color:#6b7280;font-weight:500;}
+
+  .spinner-wrap{display:flex;align-items:center;gap:10px;padding:14px;background:#eff6ff;border-radius:10px;margin-bottom:0.75rem;border:1px solid #bfdbfe;}
+  .spinner{width:18px;height:18px;border:2px solid #bfdbfe;border-top-color:#1a4fa8;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="logo-bar">
+    <div class="logo-icon"><i class="ti ti-stethoscope"></i></div>
+    <div>
+      <div class="logo-text">AnesteControl</div>
+      <div class="logo-sub">Lagos Anestesia · Hospital Santa Helena</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-user"></i> Identificação</div>
+    <select id="sel-medico">
+      <option value="">Selecione seu nome...</option>
+      <option value="Igor Souza de Almeida|52-81634-5">Igor Souza de Almeida</option>
+      <option value="Alberto Luís da Costa Martins|52-59939-5">Alberto Luís da Costa Martins</option>
+      <option value="André Santos Carmo|52-89827-9">André Santos Carmo</option>
+      <option value="Rodrigo Vieira Guimarães|52-76888-0">Rodrigo Vieira Guimarães</option>
+      <option value="Bruno Pacheco Ibraim|52-93697-9">Bruno Pacheco Ibraim</option>
+      <option value="Igor Ferreira Arantes|52-0113517-1">Igor Ferreira Arantes</option>
+      <option value="Renato Ferreira de Oliveira|52-0071539-5">Renato Ferreira de Oliveira</option>
+      <option value="Lucas Delesposte Lins|52-0108020-2">Lucas Delesposte Lins</option>
+    </select>
+    <button class="btn-primary" onclick="doLogin()"><i class="ti ti-arrow-right"></i> Entrar</button>
+  </div>
+  <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:1rem;">Hospital Santa Helena · Cabo Frio RJ</p>
+</div>
+
+<!-- HOME -->
+<div id="screen-home" class="screen">
+  <div class="logo-bar">
+    <div class="logo-icon"><i class="ti ti-stethoscope"></i></div>
+    <div style="flex:1;">
+      <div class="logo-text">AnesteControl</div>
+      <div class="logo-sub" id="home-medico-label"></div>
+    </div>
+    <span style="font-size:12px;color:#6b7280;cursor:pointer;" onclick="goScreen('screen-login')">Sair</span>
+  </div>
+
+  <div class="home-btn" onclick="iniciarNovoCaso()">
+    <div class="home-btn-icon"><i class="ti ti-plus"></i></div>
+    <div>
+      <div class="home-btn-text">Novo procedimento</div>
+      <div class="home-btn-sub">Fotografar documentos → enviar PDF</div>
+    </div>
+  </div>
+</div>
+
+<!-- CAPTURA -->
+<div id="screen-captura" class="screen">
+  <div class="nav-back" onclick="goScreen('screen-home')"><i class="ti ti-arrow-left"></i> Início</div>
+  <div class="progress-bar"><div class="progress-fill" id="captura-progress" style="width:0%"></div></div>
+  <div class="step-pills" id="step-pills"></div>
+  <div id="doc-upload-area"></div>
+  <input type="file" id="file-input-hidden" accept="image/*" capture="environment" onchange="onFileSelected(this)">
+  <div id="captura-nav" style="display:none;">
+    <button class="btn-primary" id="btn-proximo" onclick="proximoDoc()"><i class="ti ti-arrow-right"></i> Próximo documento</button>
+    <button class="btn-secondary" onclick="document.getElementById('file-input-hidden').click()"><i class="ti ti-camera"></i> Refazer foto</button>
+  </div>
+</div>
+
+<!-- IDENTIFICAÇÃO DO PACIENTE (campos manuais simples, sem IA) -->
+<div id="screen-identificacao" class="screen">
+  <div class="nav-back" onclick="goScreen('screen-captura')"><i class="ti ti-arrow-left"></i> Voltar</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-id-badge"></i> Identificação rápida</div>
+    <div class="info-box"><i class="ti ti-info-circle"></i> Só para nomear o arquivo — a secretaria confere os dados completos nas fotos do PDF.</div>
+    <label style="font-size:11px;color:#6b7280;font-weight:500;">Nome do paciente</label>
+    <input id="id-paciente" placeholder="Nome completo">
+    <label style="font-size:11px;color:#6b7280;font-weight:500;">Convênio</label>
+    <select id="id-convenio">
+      <option value="">Selecione...</option>
+      <option>Allianz Saúde</option><option>AMAFRERJ</option><option>Amil</option>
+      <option>Anafe Saúde</option><option>Fundação ASSEFAZ</option><option>Assim Saúde</option>
+      <option>Banco Central do Brasil</option><option>Bradesco Saúde</option>
+      <option>Bradesco Saúde Operadora de Planos SA</option><option>Caberj Saúde</option>
+      <option>Integral Saúde</option><option>CAMPERJ</option><option>Capesaude</option>
+      <option>Careplus</option><option>Cassi</option><option>Caurj</option>
+      <option>Eletrobras Cepel</option><option>Eletros-saude</option><option>Embratel</option>
+      <option>Evida</option><option>Fapes BNDES</option><option>FioSaude</option>
+      <option>Itaú Fundação Saúde</option><option>GEAP Saúde</option><option>INB</option>
+      <option>Klini Saúde</option><option>Life</option><option>Mediservice</option>
+      <option>MedSenior</option><option>NovaSaude</option><option>Omint</option>
+      <option>Pame</option><option>Vale Pasa</option><option>Petrobras</option>
+      <option>Porto Saúde</option><option>Postal Saúde</option><option>Proasa</option>
+      <option>Real Grandeza</option><option>Rede Gama</option><option>Saúde ABAS</option>
+      <option>Saúde Caixa</option><option>Seguros Unimed</option><option>Select</option>
+      <option>SERPRO</option><option>SulAmérica</option><option>Telos</option>
+      <option>Unafisco Saúde</option><option>Unimed Brasil</option><option>Unimed Central Nacional</option>
+      <option>Particular</option><option>Outro</option>
+    </select>
+    <label style="font-size:11px;color:#6b7280;font-weight:500;">Data do procedimento</label>
+    <input id="id-data" type="date">
+  </div>
+  <button class="btn-primary" id="btn-gerar-pdf" onclick="gerarPDF()"><i class="ti ti-file-text"></i> Gerar PDF</button>
+</div>
+
+<!-- RESULTADO -->
+<div id="screen-resultado" class="screen">
+  <div class="nav-back" onclick="goScreen('screen-identificacao')"><i class="ti ti-arrow-left"></i> Voltar</div>
+  <div class="success-box"><i class="ti ti-circle-check"></i> PDF gerado! Toque em enviar para abrir o WhatsApp.</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-file-invoice"></i> Resumo do envio</div>
+    <div class="thumbs-row" id="thumbs-resumo"></div>
+    <div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:1rem;" id="resumo-texto"></div>
+    <button class="btn-whats" onclick="enviarWhatsapp()"><i class="ti ti-brand-whatsapp"></i> Enviar para a secretaria</button>
+    <button class="btn-secondary" onclick="baixarPDF()"><i class="ti ti-download"></i> Baixar PDF</button>
+    <button class="btn-secondary" onclick="novoRegistro()"><i class="ti ti-plus"></i> Novo procedimento</button>
+  </div>
+</div>
+
+<script>
+const DOCS = [
+  {id:'capa',label:'Capa do prontuário',icon:'ti-id-badge',sub:'Dados de identificação do paciente'},
+  {id:'autorizacao',label:'Guia de autorização',icon:'ti-clipboard-list',sub:'Códigos e procedimentos autorizados'},
+  {id:'cirurgico',label:'Descrição cirúrgica',icon:'ti-report-medical',sub:'Procedimento realizado'},
+  {id:'anestesia',label:'Ficha de anestesia (PEPO)',icon:'ti-stethoscope',sub:'Dados anestésicos'}
+];
+
+const SECRETARIA_WHATSAPP = '5522991037722';
+
+let medico='',crm='',currentDoc=0;
+let docImages={};
+let pdfBlob=null,pdfFileName='';
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function doLogin(){
+  const v=document.getElementById('sel-medico').value;
+  if(!v){alert('Selecione seu nome.');return;}
+  const p=v.split('|');
+  medico=p[0];crm=p[1];
+  document.getElementById('home-medico-label').textContent=crm+' · Santa Helena';
+  goScreen('screen-home');
+}
+
+function iniciarNovoCaso(){
+  currentDoc=0;docImages={};
+  renderStepPills();renderDocUpload();
+  document.getElementById('captura-nav').style.display='none';
+  goScreen('screen-captura');
+}
+
+function renderStepPills(){
+  document.getElementById('step-pills').innerHTML=DOCS.map((d,i)=>{
+    let cls=i<currentDoc?'done':i===currentDoc?'current':'';
+    let icon=i<currentDoc?'<i class="ti ti-check"></i> ':'';
+    return `<span class="pill ${cls}">${icon}${i+1}. ${d.label.split(' ')[0]}</span>`;
+  }).join('');
+  document.getElementById('captura-progress').style.width=(currentDoc/4*100)+'%';
+}
+
+function renderDocUpload(){
+  const doc=DOCS[currentDoc];
+  const hasImg=!!docImages[doc.id];
+  document.getElementById('doc-upload-area').innerHTML=`
+    <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">${doc.label}</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:0.75rem;">${doc.sub}</div>
+    ${hasImg
+      ?`<img src="${docImages[doc.id]}" class="preview-img" alt="Prévia"><button class="btn-sm" onclick="document.getElementById('file-input-hidden').click()"><i class="ti ti-camera"></i> Refazer</button>`
+      :`<div class="doc-card" onclick="document.getElementById('file-input-hidden').click()">
+          <i class="ti ${doc.icon} doc-icon"></i>
+          <div class="doc-name">Fotografar / selecionar imagem</div>
+          <div class="doc-sub">Toque para abrir câmera ou galeria</div>
+        </div>`
+    }`;
+  document.getElementById('file-input-hidden').value='';
+  if(hasImg){
+    document.getElementById('captura-nav').style.display='block';
+    const isLast=currentDoc===DOCS.length-1;
+    const btn=document.getElementById('btn-proximo');
+    btn.innerHTML=isLast?'<i class="ti ti-arrow-right"></i> Continuar':'<i class="ti ti-arrow-right"></i> Próximo documento';
+    btn.onclick=isLast?irParaIdentificacao:proximoDoc;
+  }else{
+    document.getElementById('captura-nav').style.display='none';
+  }
+}
+
+function onFileSelected(input){
+  const file=input.files[0];if(!file)return;
+  const img=new Image();
+  const url=URL.createObjectURL(file);
+  img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    const MAX=1600;
+    let w=img.width,h=img.height;
+    if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+    if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+    canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    const dataUrl=canvas.toDataURL('image/jpeg',0.82);
+    URL.revokeObjectURL(url);
+    const doc=DOCS[currentDoc];
+    docImages[doc.id]=dataUrl;
+    renderDocUpload();
+  };
+  img.src=url;
+}
+
+function proximoDoc(){
+  currentDoc++;
+  renderStepPills();renderDocUpload();
+}
+
+function irParaIdentificacao(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('id-data').value=today;
+  goScreen('screen-identificacao');
+}
+
+async function gerarPDF(){
+  const paciente=document.getElementById('id-paciente').value.trim();
+  const convenio=document.getElementById('id-convenio').value;
+  const data=document.getElementById('id-data').value;
+
+  if(!paciente){alert('Informe o nome do paciente.');return;}
+
+  const btn=document.getElementById('btn-gerar-pdf');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader-2"></i> Gerando PDF...';
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const pageW=210, pageH=297, margin=10;
+
+  // Capa
+  pdf.setFontSize(16);
+  pdf.setFont(undefined,'bold');
+  pdf.text('AnesteControl - Lagos Anestesia',margin,20);
+  pdf.setFontSize(11);
+  pdf.setFont(undefined,'normal');
+  pdf.text('Hospital Santa Helena',margin,28);
+  pdf.line(margin,32,pageW-margin,32);
+
+  let y=42;
+  const linha=(label,val)=>{
+    pdf.setFont(undefined,'bold');
+    pdf.text(label+':',margin,y);
+    pdf.setFont(undefined,'normal');
+    pdf.text(val||'-',margin+45,y);
+    y+=8;
+  };
+  linha('Paciente',paciente);
+  linha('Convenio',convenio);
+  linha('Data do procedimento',formatarData(data));
+  linha('Anestesista',medico);
+  linha('CRM',crm);
+  linha('Documento gerado em',new Date().toLocaleString('pt-BR'));
+
+  y+=6;
+  pdf.setFontSize(10);
+  pdf.setTextColor(100);
+  pdf.text('Documentos anexados nas paginas seguintes:',margin,y);
+  y+=7;
+  DOCS.forEach((d,i)=>{
+    pdf.text((i+1)+'. '+d.label,margin+4,y);
+    y+=6;
+  });
+  pdf.setTextColor(0);
+
+  // Páginas com as fotos
+  for(const doc of DOCS){
+    pdf.addPage();
+    pdf.setFontSize(12);
+    pdf.setFont(undefined,'bold');
+    pdf.text(doc.label,margin,15);
+    pdf.setDrawColor(200);
+    pdf.line(margin,18,pageW-margin,18);
+
+    const imgData=docImages[doc.id];
+    const dims=await getImageDimensions(imgData);
+    const maxW=pageW-margin*2;
+    const maxH=pageH-35;
+    const scale=Math.min(maxW/dims.w,maxH/dims.h);
+    const drawW=dims.w*scale;
+    const drawH=dims.h*scale;
+    const x=(pageW-drawW)/2;
+    pdf.addImage(imgData,'JPEG',x,25,drawW,drawH);
+  }
+
+  pdfBlob=pdf.output('blob');
+  const dataSafe=(data||'').replace(/-/g,'');
+  const pacienteSafe=paciente.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30);
+  pdfFileName=`AnesteControl_${pacienteSafe}_${dataSafe}.pdf`;
+
+  // Resumo na tela
+  document.getElementById('thumbs-resumo').innerHTML=DOCS.map(d=>`
+    <div class="thumb-card">
+      <img src="${docImages[d.id]}" alt="${d.label}">
+      <div class="thumb-label">${d.label}</div>
+    </div>`).join('');
+
+  document.getElementById('resumo-texto').innerHTML=`
+    <strong>${paciente}</strong><br>
+    ${convenio||'Convênio não informado'} · ${formatarData(data)}<br>
+    Anestesista: ${medico} (${crm})`;
+
+  btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-file-text"></i> Gerar PDF';
+  goScreen('screen-resultado');
+}
+
+function getImageDimensions(dataUrl){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>resolve({w:img.width,h:img.height});
+    img.src=dataUrl;
+  });
+}
+
+function formatarData(iso){
+  if(!iso)return '-';
+  const [a,m,d]=iso.split('-');
+  return `${d}/${m}/${a}`;
+}
+
+function baixarPDF(){
+  if(!pdfBlob)return;
+  const url=URL.createObjectURL(pdfBlob);
+  const a=document.createElement('a');
+  a.href=url;a.download=pdfFileName;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+
+async function enviarWhatsapp(){
+  if(!pdfBlob)return;
+  const paciente=document.getElementById('id-paciente').value.trim();
+  const msg=`AnesteControl - Lagos Anestesia%0APaciente: ${encodeURIComponent(paciente)}%0AAnestesista: ${encodeURIComponent(medico)}%0APDF anexo com os documentos do procedimento.`;
+
+  const file=new File([pdfBlob],pdfFileName,{type:'application/pdf'});
+
+  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({files:[file],title:'AnesteControl',text:`Paciente: ${paciente} - ${medico}`});
+      return;
+    }catch(e){
+      // usuário cancelou ou erro - cai no fallback abaixo
+    }
+  }
+
+  // Fallback: baixa o PDF e abre o WhatsApp com a mensagem (sem anexo automático)
+  baixarPDF();
+  setTimeout(()=>{
+    window.location.href=`https://wa.me/${SECRETARIA_WHATSAPP}?text=${msg}%0A%0A(PDF baixado - anexe o arquivo da pasta Downloads)`;
+  },800);
+}
+
+function novoRegistro(){
+  document.getElementById('id-paciente').value='';
+  document.getElementById('id-convenio').value='';
+  pdfBlob=null;
+  iniciarNovoCaso();
+}
+</script>
+</body>
+</html>
