@@ -124,7 +124,7 @@
     </div>
   </div>
 
-  <div class="home-btn" onclick="abrirEstatisticas()">
+  <div class="home-btn" onclick="abrirEstatisticas()" id="btn-stats" style="display:none;">
     <div class="home-btn-icon" style="background:#f0fdf4;color:#059669;"><i class="ti ti-chart-bar"></i></div>
     <div>
       <div class="home-btn-text">Estatísticas</div>
@@ -164,28 +164,8 @@
     <div class="info-box"><i class="ti ti-info-circle"></i> Só para nomear o arquivo — a secretaria confere os dados completos nas fotos do PDF.</div>
     <label style="font-size:11px;color:#6b7280;font-weight:500;">Nome do paciente</label>
     <input id="id-paciente" placeholder="Nome completo">
-    <label style="font-size:11px;color:#6b7280;font-weight:500;">Convênio</label>
-    <select id="id-convenio">
-      <option value="">Selecione...</option>
-      <option>Allianz Saúde</option><option>AMAFRERJ</option><option>Amil</option>
-      <option>Anafe Saúde</option><option>Fundação ASSEFAZ</option><option>Assim Saúde</option>
-      <option>Banco Central do Brasil</option><option>Bradesco Saúde</option>
-      <option>Bradesco Saúde Operadora de Planos SA</option><option>Caberj Saúde</option>
-      <option>Integral Saúde</option><option>CAMPERJ</option><option>Capesaude</option>
-      <option>Careplus</option><option>Cassi</option><option>Caurj</option>
-      <option>Eletrobras Cepel</option><option>Eletros-saude</option><option>Embratel</option>
-      <option>Evida</option><option>Fapes BNDES</option><option>FioSaude</option>
-      <option>Itaú Fundação Saúde</option><option>GEAP Saúde</option><option>INB</option>
-      <option>Klini Saúde</option><option>Life</option><option>Mediservice</option>
-      <option>MedSenior</option><option>NovaSaude</option><option>Omint</option>
-      <option>Pame</option><option>Vale Pasa</option><option>Petrobras</option>
-      <option>Porto Saúde</option><option>Postal Saúde</option><option>Proasa</option>
-      <option>Real Grandeza</option><option>Rede Gama</option><option>Saúde ABAS</option>
-      <option>Saúde Caixa</option><option>Seguros Unimed</option><option>Select</option>
-      <option>SERPRO</option><option>SulAmérica</option><option>Telos</option>
-      <option>Unafisco Saúde</option><option>Unimed Brasil</option><option>Unimed Central Nacional</option>
-      <option>Particular</option><option>Outro</option>
-    </select>
+    <label style="font-size:11px;color:#6b7280;font-weight:500;">Observações (opcional)</label>
+    <input id="id-convenio" placeholder="Alguma observação sobre o procedimento?">
     <label style="font-size:11px;color:#6b7280;font-weight:500;">Data do procedimento</label>
     <input id="id-data" type="date">
   </div>
@@ -327,6 +307,7 @@ function doLogin(){
   const p=v.split('|');
   medico=p[0];crm=p[1];
   document.getElementById('home-medico-label').textContent=crm+' · Santa Helena';
+  document.getElementById('btn-stats').style.display=(medico==='Igor Souza de Almeida')?'flex':'none';
   goScreen('screen-home');
 }
 
@@ -437,7 +418,7 @@ async function gerarPDF(){
     y+=8;
   };
   linha('Paciente',paciente);
-  linha('Convenio',convenio);
+  linha('Observacoes',convenio);
   linha('Data do procedimento',formatarData(data));
   linha('Anestesista',medico);
   linha('CRM',crm);
@@ -488,7 +469,7 @@ async function gerarPDF(){
 
   document.getElementById('resumo-texto').innerHTML=`
     <strong>${paciente}</strong><br>
-    ${convenio||'Convênio não informado'} · ${formatarData(data)}<br>
+    ${convenio||'Sem observações'} · ${formatarData(data)}<br>
     Anestesista: ${medico} (${crm})`;
 
   await registrarEnvio(paciente,convenio,data);
